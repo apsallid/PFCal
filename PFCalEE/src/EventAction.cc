@@ -22,7 +22,8 @@ EventAction::EventAction()
   outF_=TFile::Open("PFcal.root","RECREATE");
   outF_->cd();
 
-  double xysize = ((DetectorConstruction*)G4RunManager::GetRunManager()->GetUserDetectorConstruction())->GetCalorSizeXY();
+  xysize = ((DetectorConstruction*)G4RunManager::GetRunManager()->GetUserDetectorConstruction())->GetCalorSizeXY();
+  zsize = ((DetectorConstruction*)G4RunManager::GetRunManager()->GetUserDetectorConstruction())->GetCalorSizeZ();
 
   //save some info
   HGCSSInfo *info = new HGCSSInfo();
@@ -80,10 +81,11 @@ void EventAction::BeginOfEventAction(const G4Event* evt)
 //
 void EventAction::Detect(G4double edep, G4double stepl,G4double globalTime, 
 			 G4int pdgId, G4VPhysicalVolume *volume, const G4ThreeVector & position, 
+			 const G4ThreeVector & postposition, G4double endPointEnergy, 
 			 G4int trackID, G4int parentID,
 			 const HGCSSGenParticle & genPart)
 {
-  for(size_t i=0; i<detector_->size(); i++) (*detector_)[i].add(edep,stepl,globalTime,pdgId,volume,position,trackID,parentID,i);
+  for(size_t i=0; i<detector_->size(); i++) (*detector_)[i].add(edep,stepl,globalTime,pdgId,volume,position,postposition,endPointEnergy,trackID,parentID,i,xysize,zsize);
   if (genPart.isIncoming()) genvec_.push_back(genPart);
 }
 
@@ -122,6 +124,8 @@ void EventAction::EndOfEventAction(const G4Event* g4evt)
   ssvec_.clear();
   ssvec_.reserve(detector_->size());
 
+  double totalabsleakmeasE = 0.;
+
   for(size_t i=0; i<detector_->size(); i++) 
     {
       HGCSSSamplingSection lSec;
@@ -131,6 +135,12 @@ void EventAction::EndOfEventAction(const G4Event* g4evt)
       lSec.volLambdatrans((*detector_)[i].getAbsorberLambda());
       lSec.absorberE((*detector_)[i].getAbsorbedEnergy());
       lSec.measuredE((*detector_)[i].getMeasuredEnergy(false));
+      lSec.leakageE((*detector_)[i].getLeakageEnergy());
+      lSec.lateralleakageE((*detector_)[i].getLateralLeakageEnergy());
+      lSec.rearleakageE((*detector_)[i].getRearLeakageEnergy());
+      lSec.frontleakageE((*detector_)[i].getFrontLeakageEnergy());
+      //Just checking
+      totalabsleakmeasE = totalabsleakmeasE + (*detector_)[i].getLeakageEnergy() + (*detector_)[i].getAbsorbedEnergy() + (*detector_)[i].getMeasuredEnergy(false);
       lSec.totalE((*detector_)[i].getTotalEnergy());
       lSec.gFrac((*detector_)[i].getPhotonFraction());
       lSec.eFrac((*detector_)[i].getElectronFraction());
@@ -182,6 +192,8 @@ void EventAction::EndOfEventAction(const G4Event* g4evt)
     
   }
 
+  std::cout << "Testing total " << totalabsleakmeasE << std::endl;
+    
   tree_->Fill();
   
   //reset vectors

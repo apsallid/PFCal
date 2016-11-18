@@ -52,6 +52,18 @@ public:
   inline double absorberE() const{
     return absorberE_;
   };
+  inline double leakageE() const{
+    return leakageE_;
+  };
+  inline double lateralleakageE() const{
+    return lateralleakageE_;
+  };
+  inline double rearleakageE() const{
+    return rearleakageE_;
+  };
+  inline double frontleakageE() const{
+    return frontleakageE_;
+  };
   inline double totalE() const{
     return totalE_;
   };
@@ -96,6 +108,18 @@ public:
   inline void absorberE(const double & aVal){
     absorberE_ = aVal;
   };
+  inline void leakageE(const double & aVal){
+    leakageE_ = aVal;
+  };
+  inline void lateralleakageE(const double & aVal){
+    lateralleakageE_ = aVal;
+  };
+  inline void rearleakageE(const double & aVal){
+    rearleakageE_ = aVal;
+  };
+  inline void frontleakageE(const double & aVal){
+    frontleakageE_ = aVal;
+  };
   inline void totalE(const double & aVal){
     totalE_ = aVal;
   };
@@ -128,6 +152,10 @@ private:
   double volLambdatrans_;
   double measuredE_;
   double absorberE_;
+  double leakageE_;
+  double lateralleakageE_;
+  double rearleakageE_;
+  double frontleakageE_;
   double totalE_;
   double gFrac_;
   double eFrac_;

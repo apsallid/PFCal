@@ -76,8 +76,10 @@ public:
 	   G4double globalTime,G4int pdgId,
 	   G4VPhysicalVolume* vol, 
 	   const G4ThreeVector & position,
+	   const G4ThreeVector & postposition,
+	   G4double endpointene,
 	   G4int trackID, G4int parentID,
-	   G4int layerId);
+	   G4int layerId, G4double xysize, G4double zsize);
   
   inline bool isSensitiveElement(const unsigned & aEle){
     if (aEle < n_elements &&
@@ -114,7 +116,9 @@ public:
 	 ele_name[aEle] == "W" || ele_name[aEle] == "Brass" ||
 	 ele_name[aEle] == "Fe" || ele_name[aEle] == "Steel" || 
 	 ele_name[aEle] == "SSteel" || ele_name[aEle] == "Al" ||
-	 ele_name[aEle] == "WCu" || ele_name[aEle] == "NeutMod"
+	 ele_name[aEle] == "WCu" || ele_name[aEle] == "NeutMod" ||
+	 //Added this also
+	 ele_name[aEle] == "PCB"
 	 )
 	) return true;
     return false;
@@ -123,8 +127,12 @@ public:
   //reset
   inline void resetCounters()
   {
-    ele_den.resize(n_elements,0);
-    ele_dl.resize(n_elements,0);
+    ele_den.clear();ele_den.resize(n_elements,0);
+    ele_dl.clear();ele_dl.resize(n_elements,0);
+    ele_sideleakene.clear();ele_sideleakene.resize(n_elements,0);
+    ele_rearleakene.clear();ele_rearleakene.resize(n_elements,0);
+    ele_frontleakene.clear();ele_frontleakene.resize(n_elements,0);
+    ele_leakene.clear();ele_leakene.resize(n_elements,0);
     sens_time.resize(n_sens_elements,0);
     sens_gFlux.resize(n_sens_elements,0);
     sens_eFlux.resize(n_sens_elements,0);
@@ -145,6 +153,10 @@ public:
   //
   G4double getMeasuredEnergy(bool weighted=true);
   G4double getAbsorbedEnergy();
+  G4double getRearLeakageEnergy();
+  G4double getLateralLeakageEnergy();
+  G4double getFrontLeakageEnergy();
+  G4double getLeakageEnergy();
   G4double getTotalEnergy();
   G4double getAbsorberX0();  
   G4double getAbsorberdEdx();  
@@ -174,6 +186,10 @@ public:
   std::vector<G4double>           ele_dEdx;
   std::vector<G4double>           ele_L0;
   std::vector<G4double>           ele_den;
+  std::vector<G4double>           ele_sideleakene;
+  std::vector<G4double>           ele_rearleakene;
+  std::vector<G4double>           ele_frontleakene;
+  std::vector<G4double>           ele_leakene;
   std::vector<G4double>           ele_dl;
   std::vector<G4VPhysicalVolume*> ele_vol;
   std::vector<G4double>           sens_gFlux, sens_eFlux, sens_muFlux, sens_neutronFlux, sens_hadFlux, sens_time;

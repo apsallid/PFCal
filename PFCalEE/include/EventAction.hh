@@ -35,6 +35,7 @@ public:
 
   void Detect(G4double edep, G4double stepl,G4double globalTime, G4int pdgId, 
 	      G4VPhysicalVolume *volume, const G4ThreeVector & position,
+	      const G4ThreeVector & postposition, G4double endPointEnergy, 
 	      G4int trackID, G4int parentID,
 	      const HGCSSGenParticle & genPart);
   
@@ -62,6 +63,10 @@ private:
   HGCSSSimHitVec hitvec_;
   HGCSSGenParticleVec genvec_;
   EventActionMessenger*  eventMessenger;
+
+  G4double xysize;
+  G4double zsize;
+
   //std::ofstream fout_;
 
 };

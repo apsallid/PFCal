@@ -137,6 +137,7 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
   //((thePrePVname=="Si18_0phys" && thePostPVname=="Si18_1phys") || 
   //(thePrePVname=="Si18_1phys" && thePostPVname=="Si18_0phys"))
 //)
+  const G4ThreeVector & postposition = thePostStepPoint->GetPosition();
   if (globalTime < timeLimit_ && 
       thePrePVname=="Wphys"
       && eventAction_->isFirstVolume(thePostPVname))
@@ -144,11 +145,12 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
     //if (pdgId == 2112) 
     //std::cout << "-- found incoming: " << thePrePVname << " " << thePostPVname << " " << globalTime << std::endl;
     //const G4ThreeVector & preposition = thePreStepPoint->GetPosition();
-    const G4ThreeVector & postposition = thePostStepPoint->GetPosition();
+    // const G4ThreeVector & postposition = thePostStepPoint->GetPosition();
     //std::cout << "pre " << preposition[0] << " " << preposition[1] << " " << postposition[2]
     //	      << std::endl
     //	      << "post " << postposition[0] << " " << postposition[1] << " " << postposition[2]
     //	      << std::endl;
+    std::cout << thePostStepPoint->GetTotalEnergy() << std::endl;
     const G4ThreeVector &p = lTrack->GetMomentum();
     G4ParticleDefinition *pd = lTrack->GetDefinition();
     genPart.setPosition(postposition[0],postposition[1],postposition[2]);
@@ -161,6 +163,18 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
     //if (pdgId == 2112) genPart.Print(G4cout);
   }
 
-  eventAction_->Detect(edep,stepl,globalTime,pdgId,volume,position,trackID,parentID,genPart);
+  G4int ID = aStep->GetTrack()->GetDefinition()->GetPDGEncoding() ;
+  G4double endPointEnergy = 0.;
+
+  if (thePostPVname=="Wphys" && thePrePVname!="Wphys" && (thePostStepPoint->GetStepStatus() == fGeomBoundary) ){
+    if ( ID >= 1000000000 || ID == 2112 || ID == 2212 ){ //protons, neutrons
+      endPointEnergy = thePostStepPoint->GetKineticEnergy();
+    } else{
+      endPointEnergy = thePostStepPoint->GetTotalEnergy();
+    }
+    // std::cout << thePrePVname << " energy " << endPointEnergy << " postpos x " << postposition.x() << " postpos y " << postposition.y() << " postpos z " << postposition.z() << std::endl; 
+  }
+
+  eventAction_->Detect(edep,stepl,globalTime,pdgId,volume,position,postposition,endPointEnergy,trackID,parentID,genPart);
   //eventAction_->Detect(edep,stepl,globalTime,pdgId,volume,iyiz);
 }

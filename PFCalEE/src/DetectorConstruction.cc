@@ -855,12 +855,12 @@ void DetectorConstruction::UpdateCalorSize(){
     m_nSectors    = 1;
     m_sectorWidth = CELL_SIZE_X * 2 *11;
     m_interSectorWidth = 0;
-    m_CalorSizeXY = m_sectorWidth*m_nSectors;
+    m_CalorSizeXY = m_sectorWidth;
     m_minRadius   = m_CalorSizeXY/(2*sqrt(3)); // center-to-side radius of hexagon
     m_maxRadius   = m_CalorSizeXY/2.;          // center-to-corner radius of hexagon
   }
   else if (model_ == DetectorConstruction::m_FULLSECTION){
-    m_CalorSizeXY=2800*2;//use full length for making hexagon map
+    m_CalorSizeXY=2800;//1700;
     m_minRadius = 150;
     m_maxRadius = m_CalorSizeXY;
     m_minEta = 1.4;
@@ -986,11 +986,24 @@ void DetectorConstruction::buildSectorStack(const unsigned sectorNum,
       const unsigned nEle = m_caloStruct[i].n_elements;
       //index for counting Si sensitive layers
       unsigned idx = 0;
+      int absidx = 0; 
 
       for (unsigned ie(0); ie<nEle;++ie){
 	std::string eleName = m_caloStruct[i].ele_name[ie];
 	if (m_nSectors==1) sprintf(nameBuf,"%s%d",eleName.c_str(),int(i+1));
 	else sprintf(nameBuf,"%s%d_%d",eleName.c_str(),int(sectorNum),int(i+1));
+	//If in a layer/sampling section there are two identical elements, e.g Cu or Pb, 
+	//then the volume name is the same and the absorber energy is wrong. 
+	//So, check if it is an absorber element
+	if ( eleName == "Pb" || eleName == "Cu" || eleName == "W" ||  eleName == "Brass" ||
+	     eleName == "Fe" || eleName == "Steel" || eleName == "SSteel" || eleName == "Al" ||
+	     eleName == "WCu" || eleName == "NeutMod" || 
+	     //Added this also
+	     eleName == "PCB"
+	     ){
+	  absidx++;
+	  sprintf(nameBuf,"%s%d_%d",eleName.c_str(),int(i+1),int(absidx));
+	}
 	if (eleName=="Si") {
 	  if (m_nSectors==1) sprintf(nameBuf,"Si%d_%d",int(i+1),idx);
 	  else sprintf(nameBuf,"Si%d_%d_%d",int(sectorNum),int(i+1),idx);

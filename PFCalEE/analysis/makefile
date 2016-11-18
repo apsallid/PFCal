@@ -19,10 +19,12 @@ USERLIBS += -Wl,-rpath,$(FASTJET_INSTALL)/lib -lm  -L$(FASTJET_INSTALL)/lib -lfa
 USERLIBS += -L$(BOOSTSYS)/lib -lboost_regex -lboost_program_options -lboost_filesystem
 
 #CXXFLAGS = -Wall -W -Wno-unused-function -Wno-parentheses -Wno-char-subscripts -Wno-unused-parameter -O2 
-CXXFLAGS = -g -Wall -W -O2 -std=c++0x # -std=c++11 
+#CXXFLAGS = -g -Wall -W -O2 -std=c++0x  # -std=c++11 
+#Change the above to this due to var-tracking complaining
+CXXFLAGS = -g -Wall -W -O2 -std=c++0x  -fno-inline -ffloat-store -fno-builtin -frounding-math # -std=c++11 
+
 #CXXFLAGS = -Wall -W -O2 -std=c++11 
 LDFLAGS = -shared -Wall -W
-
 
 # If possible we'll use the clang compiler, it's faster and gives more helpful error messages
 # If it's not available, then fallback to gcc.
@@ -70,9 +72,8 @@ OBJS=$(subst $(SRCDIR), $(OBJDIR),$(subst cc,$(OBJ_EXT),$(SRCS)))
 #BINS=$(EXEDIR)/egammaResolution $(EXEDIR)/higgsResolution
 #BINS= $(EXEDIR)/validation $(EXEDIR)/egammaResoWithTruth $(EXEDIR)/egammaResolution $(EXEDIR)/hadronResolution $(EXEDIR)/plotNabove100fC
 
-#BINS=$(EXEDIR)/egammaResoWithTruth
-#BINS=$(EXEDIR)/studyOutliers
-BINS=$(EXEDIR)/getAbsorberWeight $(EXEDIR)/egammaResoWithTruth
+#BINS=$(EXEDIR)/egammaResoWithTruth $(EXEDIR)/Calibration
+BINS=$(EXEDIR)/Calibration $(EXEDIR)/Leakage $(EXEDIR)/RecoE $(EXEDIR)/Samplingfraction $(EXEDIR)/SimClustering
 # $(EXEDIR)/egammaResolution $(EXEDIR)/hadronResolution $(EXEDIR)/plotNabove100fC
 
 SUBDIRS = ../userlib
@@ -143,6 +144,21 @@ $(EXEDIR)/getAbsorberWeight:  $(TESTDIR)/getAbsorberWeight.cpp $(LIBDIR)/lib$(LI
 $(EXEDIR)/mipStudy:  $(TESTDIR)/mipStudy.cpp $(LIBDIR)/lib$(LIBNAME).so $(wildcard $(BASEDIR)/include/*.h*)
 	$(CXX) -o $@ $(CXXFLAGS) $< $(LIBS) -L$(LIBDIR) -l$(LIBNAME)
 
+$(EXEDIR)/Leakage:  $(TESTDIR)/Leakage.cpp $(LIBDIR)/lib$(LIBNAME).so $(wildcard $(BASEDIR)/include/*.h*)
+	$(CXX) -o $@ $(CXXFLAGS) $< $(LIBS) -L$(LIBDIR) -l$(LIBNAME)
+
+$(EXEDIR)/Calibration:  $(TESTDIR)/Calibration.cpp $(LIBDIR)/lib$(LIBNAME).so $(wildcard $(BASEDIR)/include/*.h*)
+	$(CXX) -o $@ $(CXXFLAGS) $< $(LIBS) -L$(LIBDIR) -l$(LIBNAME)
+
+$(EXEDIR)/Samplingfraction:  $(TESTDIR)/Samplingfraction.cpp $(LIBDIR)/lib$(LIBNAME).so $(wildcard $(BASEDIR)/include/*.h*)
+	$(CXX) -o $@ $(CXXFLAGS) $< $(LIBS) -L$(LIBDIR) -l$(LIBNAME)
+
+$(EXEDIR)/RecoE:  $(TESTDIR)/RecoE.cpp $(LIBDIR)/lib$(LIBNAME).so $(wildcard $(BASEDIR)/include/*.h*)
+	$(CXX) -o $@ $(CXXFLAGS) $< $(LIBS) -L$(LIBDIR) -l$(LIBNAME)
+
+$(EXEDIR)/SimClustering:  $(TESTDIR)/SimClustering.cpp $(LIBDIR)/lib$(LIBNAME).so $(wildcard $(BASEDIR)/include/*.h*)
+	$(CXX) -o $@ $(CXXFLAGS) $< $(LIBS) -L$(LIBDIR) -l$(LIBNAME)
+
 $(EXEDIR)/mipProfile:  $(TESTDIR)/mipProfile.cpp $(LIBDIR)/lib$(LIBNAME).so $(wildcard $(BASEDIR)/include/*.h*)
 	$(CXX) -o $@ $(CXXFLAGS) $< $(LIBS) -L$(LIBDIR) -l$(LIBNAME)
 
@@ -150,9 +166,6 @@ $(EXEDIR)/mipSelection:  $(TESTDIR)/mipSelection.cpp $(LIBDIR)/lib$(LIBNAME).so 
 	$(CXX) -o $@ $(CXXFLAGS) $< $(LIBS) -L$(LIBDIR) -l$(LIBNAME)
 
 $(EXEDIR)/validation:  $(TESTDIR)/validation.cpp $(LIBDIR)/lib$(LIBNAME).so $(wildcard $(BASEDIR)/include/*.h*)
-	$(CXX) -o $@ $(CXXFLAGS) $< $(LIBS) -L$(LIBDIR) -l$(LIBNAME)
-
-$(EXEDIR)/studyOutliers:  $(TESTDIR)/studyOutliers.cpp $(LIBDIR)/lib$(LIBNAME).so $(wildcard $(BASEDIR)/include/*.h*)
 	$(CXX) -o $@ $(CXXFLAGS) $< $(LIBS) -L$(LIBDIR) -l$(LIBNAME)
 
 $(OBJDIR)/%.$(OBJ_EXT):  $(SRCDIR)/%.cc $(BASEDIR)/include/%.h*

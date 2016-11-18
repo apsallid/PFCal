@@ -7,8 +7,10 @@ void SamplingSection::add(G4double den, G4double dl,
 			  G4double globalTime, G4int pdgId, 
 			  G4VPhysicalVolume* vol, 
 			  const G4ThreeVector & position,
+			  const G4ThreeVector & postposition,
+			  G4double endpointene,
 			  G4int trackID, G4int parentID,
-			  G4int layerId)
+			  G4int layerId, G4double xysize, G4double zsize)
 {
   std::string lstr = vol->GetName();
   for (unsigned ie(0); ie<n_elements*n_sectors;++ie){
@@ -16,6 +18,16 @@ void SamplingSection::add(G4double den, G4double dl,
       unsigned eleidx = ie%n_elements;
       ele_den[eleidx]+=den;
       ele_dl[eleidx]+=dl; 
+      if ( std::abs(postposition.x()) >= (xysize/2.-0.000001) || std::abs(postposition.y()) >= (xysize/2.-0.000001) ){
+	ele_sideleakene[eleidx]+=endpointene;
+	ele_leakene[eleidx]+=endpointene;
+      } else if ( postposition.z() >= ((zsize/2.)-0.000001) ){
+	ele_rearleakene[eleidx] += endpointene;
+	ele_leakene[eleidx]+=endpointene;
+      } else if ( postposition.z() <= (-zsize/2.+0.000001) ){
+	ele_frontleakene[eleidx] += endpointene;
+	ele_leakene[eleidx]+=endpointene;
+      }
       //if (lstr.find("CFMix") != lstr.npos) continue;
       if (isSensitiveElement(eleidx)) {//if Si || sci
 	unsigned idx = getSensitiveLayerIndex(lstr);
@@ -196,10 +208,51 @@ G4double SamplingSection::getAbsorbedEnergy()
 }
 
 //
+G4double SamplingSection::getRearLeakageEnergy()
+{
+  double val=0;  
+  for (unsigned ie(0); ie<n_elements;++ie){
+    val += ele_rearleakene[ie];
+  }
+  return val;
+}
+
+//
+G4double SamplingSection::getLateralLeakageEnergy()
+{
+  double val=0;  
+  for (unsigned ie(0); ie<n_elements;++ie){
+    val += ele_sideleakene[ie];
+  }
+  return val;
+}
+
+//
+G4double SamplingSection::getFrontLeakageEnergy()
+{
+  double val=0;  
+  for (unsigned ie(0); ie<n_elements;++ie){
+    val += ele_frontleakene[ie];
+  }
+  return val;
+}
+
+//
+G4double SamplingSection::getLeakageEnergy()
+{
+  double val=0;  
+  for (unsigned ie(0); ie<n_elements;++ie){
+    val += ele_leakene[ie];
+  }
+  return val;
+}
+
+//
 G4double SamplingSection::getTotalEnergy()
 {
  double val=0;  
   for (unsigned ie(0); ie<n_elements;++ie){
+    // val += (ele_den[ie]+ele_leakene[ie]);
     val += ele_den[ie];
   }
   return val;

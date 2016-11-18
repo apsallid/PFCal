@@ -132,6 +132,9 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   default: break;
   }
 
+  // x0 = (G4RandGauss::shoot(0.,1.))*cm; y0 = (G4RandGauss::shoot(0.,1.))*cm;
+  x0 = 0.*mm;y0 = 0.*mm;
+
   particleGun->SetParticlePosition(G4ThreeVector(x0,y0,z0));
   G4cout << " -- Gun position set to: " << x0 << "," << y0 << "," << z0 << G4endl;
 
@@ -147,7 +150,7 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
                 "PrimaryGeneratorAction001", FatalException,
                 "generator is not instanciated." );
 
-
+  G4cout << "Energy of gun " << particleGun->GetParticleEnergy()  << G4endl;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
